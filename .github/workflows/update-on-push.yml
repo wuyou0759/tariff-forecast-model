@@ -1,0 +1,32 @@
+name: Update Tariff Model on Data Push
+
+on:
+  push:
+    paths:
+      - 'daily_data.csv'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run forecast script
+        run: python daily_score_and_render.py
+
+      - name: Commit & push updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "update forecast from newly added data [skip ci]"
+          file_pattern: |
+            daily_data.csv
+            docs/index.html
