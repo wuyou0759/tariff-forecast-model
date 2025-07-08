@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tariff Prediction Index</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    /*to be edited*/
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>U.S. - China Tariff Prediction Model</h1>
+      <p>Directional Forecast: U.S. Average Effective Tariff Rate on China in 2026</p>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-value" id="gaugeValue">{{ latest.pred|round(0) }}</div>
+      <div>% chance that the U.S. average effective tariff rate on imports from China will increase in 2026.</div>
+    </div>
+
+    <div class="status">
+      <div id="statusLevel">
+      <!-- Example,  to be edited -->
+        {% if latest.pred <= 0.2 %}
+          VERY LOW RISK
+        {% elif latest.pred <= 0.4 %}
+          LOW RISK
+        {% elif latest.pred <= 0.6 %}
+          MODERATE RISK
+        {% elif latest.pred <= 0.8 %}
+          HIGH RISK
+        {% else %}
+          EXTREME RISK
+        {% endif %}
+      </div>
+      <div id="statusDescription">
+        <!-- Example,  to be edited -->
+        Current tariff-up probability is {{ (latest.pred*100)|round(1) }}%.
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Timeline</h3>
+      <div class="chart-box">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- other static indicators -->
+
+    <div class="update-time">
+      Last updated: {{ latest.date }}
+    </div>
+  </div>
+
+  <script>
+    // build a JS array from `history`, passed in from daily_score_and_render.py
+    const historicalData = [
+      {% for row in history %}
+        { x: "{{ row.date }}", y: {{ (row.pred*100)|round(0) }} }{{ "," if not loop.last }}
+      {% endfor %}
+    ];
+
+    let mainChart;
+    function createChart() {
+      const ctx = document.getElementById('mainChart').getContext('2d');
+      mainChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'placeholder',
+            data: historicalData,
+            tension: 0.1,
+            fill: true,
+          }]
+        },
+        options: { /* maybe add in tooltips etc idk*/ }
+      });
+    }
+
+    // draw chart
+    window.addEventListener('DOMContentLoaded', () => {
+      createChart();
+    });
+  </script>
+</body>
+</html>
